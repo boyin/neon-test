@@ -1,9 +1,9 @@
 CC = gcc
-CFLAGS = -O3 -march=native -mtune=native
+CFLAGS = -O3 -march=native -mtune=native -mcpu-native
 
 AARCH := $(shell uname -m)
 ifeq ($(AARCH),armv7l)
-	CFLAGS += -mfpu=neon -marm
+	CFLAGS += -mfpu=neon -marm 
 endif
 
 all: schoolbook schoolbook_neon_2 schoolbook_neon_3 schoolbook_neon_4 schoolbook_neon_6 schoolbook_neon_old
