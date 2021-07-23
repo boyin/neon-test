@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O3 -march=native -mtune=native -mcpu-native
+CFLAGS = -O3 -march=native -mtune=native -mcpu=native
 
 AARCH := $(shell uname -m)
 ifeq ($(AARCH),armv7l)
