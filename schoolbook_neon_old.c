@@ -18,7 +18,7 @@ int32x4_t reduce32x4 (int32x4_t a) {
   return(a);
 }
 
-void polymul(int16_t *h, const int16_t *f, const int16_t *g, const int16_t n) {
+void polymul_sb(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n) {
 
   int i, j;
   int16x4_t v0, v1, u0, u1;

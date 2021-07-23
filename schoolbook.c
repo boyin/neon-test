@@ -1,6 +1,7 @@
 #include <stdint.h>
 
-void polymul(int16_t *h, const int16_t *f, const int16_t *g, const int16_t n) {
+void polymul_sb(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n) {
+
   int64_t a;
 
   int i, j;
