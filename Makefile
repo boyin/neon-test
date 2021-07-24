@@ -6,7 +6,7 @@ ifeq ($(AARCH),armv7l)
 	CFLAGS += -mfpu=neon -marm 
 endif
 
-all: schoolbook schoolbook_neon_2 schoolbook_neon_3 schoolbook_neon_4 schoolbook_neon_6 schoolbook_neon_old
+all: schoolbook schoolbook_neon_2 schoolbook_neon_3 schoolbook_neon_4 schoolbook_neon_6 schoolbook_neon_old ka_neon_48
 
 schoolbook: schoolbook.c cpucycles.h mock_std_mult.h test.c
 	$(CC) $(CFLAGS) -o schoolbook schoolbook.c test.c
