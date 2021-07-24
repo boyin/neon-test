@@ -28,7 +28,7 @@ requires -DKARATSUBA for polymul_ka to function as polymul
 
 if you add another variation on multiplications, my suggestion is that you use a similar compiler switch
 
-
+ON THE ARMv7, the cycle counter is divided by 2^6=64.
 
 # enable_ccr
 

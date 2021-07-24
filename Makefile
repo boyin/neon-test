@@ -6,7 +6,7 @@ ifeq ($(AARCH),armv7l)
 	CFLAGS += -mfpu=neon -marm 
 endif
 
-all: schoolbook schoolbook_neon_2 schoolbook_neon_3 schoolbook_neon_4 schoolbook_neon_6 schoolbook_neon_old ka_neon_48
+all: schoolbook schoolbook_neon_2 schoolbook_neon_3 schoolbook_neon_4 schoolbook_neon_6 schoolbook_neon_old ka_neon_48 ka_neon_48_4 ka_neon_24 ka_neon_96 ka_neon_96_4
 
 schoolbook: schoolbook.c cpucycles.h mock_std_mult.h test.c
 	$(CC) $(CFLAGS) -o schoolbook schoolbook.c test.c
@@ -63,5 +63,4 @@ ka_neon_96_4: schoolbook_neon_6.c ka_neon_96.c cpucycles.h mock_std_mult.h test.
 	$(CC) $(CFLAGS) -DKARATSUBA -o ka_neon_96 ka_neon_96.c schoolbook_neon_4.c test.c
 
 clean:
-	rm schoolbook schoolbook_neon_{2,3,4,6,old} schoolbook_neon_{2,3,4,6}.c
-	rm ka_neon_{24,48,48_4,96,96_4}
+	rm -f schoolbook schoolbook_neon_{2,3,4,6,old} schoolbook_neon_{2,3,4,6}.c ka_neon_*
