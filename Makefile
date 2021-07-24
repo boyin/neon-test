@@ -50,7 +50,7 @@ ka_neon_48_4: schoolbook_neon_6.c ka_neon_48.c cpucycles.h mock_std_mult.h test.
 ka_neon_24.c: karatsuba_neon.py
 	python3 karatsuba_neon.py 24 > ka_neon_24.c
 
-ka_neon_24: schoolbook_neon_6.c ka_neon_48.c cpucycles.h mock_std_mult.h test.c
+ka_neon_24: schoolbook_neon_6.c ka_neon_24.c cpucycles.h mock_std_mult.h test.c
 	$(CC) $(CFLAGS) -DKARATSUBA -o ka_neon_24 ka_neon_24.c schoolbook_neon_3.c test.c
 
 ka_neon_96.c: karatsuba_neon.py
