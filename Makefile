@@ -62,5 +62,11 @@ ka_neon_96: schoolbook_neon_6.c ka_neon_96.c cpucycles.h mock_std_mult.h test.c
 ka_neon_96_4: schoolbook_neon_4.c ka_neon_96.c cpucycles.h mock_std_mult.h test.c
 	$(CC) $(CFLAGS) -DKARATSUBA -o ka_neon_96_4 ka_neon_96.c schoolbook_neon_4.c test.c
 
+schoolbook_neon_negc_4.c: schoolbook_neon_negc.py
+	python3 schoolbook_neon_negc.py 4 > schoolbook_neon_negc_4.c
+
+schoolbook_neon_negc_4: schoolbook_neon_negc_4.c test_negc.c
+	$(CC) $(CFLAGS) -o $@ $^
+
 clean:
 	rm -f schoolbook schoolbook_neon_{2,3,4,6,old} schoolbook_neon_{2,3,4,6}.c ka_neon_*
