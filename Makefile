@@ -6,7 +6,7 @@ ifeq ($(AARCH),armv7l)
 	CFLAGS += -mfpu=neon -marm 
 endif
 
-all: schoolbook schoolbook_neon_2 schoolbook_neon_3 schoolbook_neon_4 schoolbook_neon_6 schoolbook_neon_old ka_neon_48 ka_neon_48_4 ka_neon_24 ka_neon_96 ka_neon_96_4
+all: schoolbook schoolbook_neon_2 schoolbook_neon_3 schoolbook_neon_4 schoolbook_neon_6 schoolbook_neon_old ka_neon_48 ka_neon_48_4 ka_neon_24 ka_neon_96 ka_neon_96_4 schoolbook3_neon_3 schoolbook3_neon_2
 
 schoolbook: schoolbook.c cpucycles.h mock_std_mult.h test.c
 	$(CC) $(CFLAGS) -o schoolbook schoolbook.c test.c
@@ -67,6 +67,18 @@ schoolbook_neon_negc_4.c: schoolbook_neon_negc.py
 
 schoolbook_neon_negc_4: schoolbook_neon_negc_4.c test_negc.c
 	$(CC) $(CFLAGS) -o $@ $^
+
+schoolbook3_neon_2.c: schoolbook_neon_mod3.py
+	python3 schoolbook_neon_mod3.py 2 > schoolbook3_neon_2.c
+
+schoolbook3_neon_2: schoolbook3_neon_2.c cpucycles.h mock_std_mult.h test3.c
+	$(CC) $(CFLAGS) -o schoolbook3_neon_2 schoolbook3_neon_2.c test3.c
+
+schoolbook3_neon_3.c: schoolbook_neon_mod3.py
+	python3 schoolbook_neon_mod3.py 3 > schoolbook3_neon_3.c
+
+schoolbook3_neon_3: schoolbook3_neon_3.c cpucycles.h mock_std_mult.h test3.c
+	$(CC) $(CFLAGS) -o schoolbook3_neon_3 schoolbook3_neon_3.c test3.c
 
 clean:
 	rm -f schoolbook schoolbook_neon_{2,3,4,6,old} schoolbook_neon_{2,3,4,6}.c ka_neon_*
