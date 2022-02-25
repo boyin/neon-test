@@ -5,7 +5,9 @@
 #include "cpucycles.h"
 #include "mock_std_mult.h"
 
-#if (defined(KARATSUBA))
+#if (defined(TOOM))
+#define polymul polymul_tc
+#elif (defined(KARATSUBA))
 #define polymul polymul_ka
 #else
 #define polymul polymul_sb
@@ -17,6 +19,10 @@ int cmpfunc (const void * a, const void * b) {
    return ( *(int*)a - *(int*)b );
 }
 
+#if (defined(SIZE))
+#else
+#define SIZE=768
+#endif
 
 extern void polymul(int16_t *h, const int16_t *f, const int16_t *g, const int16_t n);
 //extern unsigned int hal_get_time();
@@ -25,8 +31,8 @@ int main(){
   int c1,c2,cc[REPS],c=0;
   int i,j;
   int16_t f[768], g[768], h[1536], hh[1536];
-  int n = 768; 
-  //int n = 64;
+  int n = SIZE;
+
   
 #ifndef __aarch64__
   hal_init_perfcounters(1,1);
