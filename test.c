@@ -21,7 +21,7 @@ int cmpfunc (const void * a, const void * b) {
 
 #if (defined(SIZE))
 #else
-#define SIZE=768
+#define SIZE 768
 #endif
 
 extern void polymul(int16_t *h, const int16_t *f, const int16_t *g, const int16_t n);
