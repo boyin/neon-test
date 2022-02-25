@@ -108,7 +108,7 @@ void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
   int16_t ff[L], gg[L], hh[2*LL];
     
   ptr = eval;
-  for (l=0; l<_K-2; l++, ptr+=_K){
+  for (l=0; l<2*_K-3; l++, ptr+=_K){
     for (j=0; j<ll; j+=4) {
       q1 = q2 = q00;
       for (i=0; i<_K; i++) {
@@ -126,7 +126,7 @@ void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
   }
   polymul(hh,f,g,ll);
   polymul(hh+2*ll,f+(_K-1)*ll,g+(_K-1)*ll,ll);  
-  for (l=0; l<_K-2; l++){
+  for (l=0; l<2*_K-2; l++){
     polymul(hh+(1+l)*2*ll,ff+l*ll,gg+l*ll,ll);
   }
   memset(h+2*ll,0,2*(2*_K-2)*ll);  
