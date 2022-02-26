@@ -38,6 +38,7 @@ NN = cmod_inverse(N, R)
 NS = int(floor(log(N)/log(2.0))) - 1
 N3 = round((R<<NS)/N)
 N2 = round(R**2/N/2)
+N4 = round((R**2<<NS)/N)
 MC = 2**(int(floor(log(R**2/(N/2.0)**2/2)/log(2.0))))
 K = 4
 
@@ -73,19 +74,20 @@ int16_t interp[] ={''')
     print('''};
 int32x4_t q00 = {0,0,0,0};
 
-/*
-int16x8_t reduce16x8 (int16x8_t a) {
+
+static int16x8_t reduce16x8 (int16x8_t a) {
   const int16x4_t N = {%d,%d,0,0};
   int16x8_t a1 = vqdmulhq_lane_s16(a, N, 1);
   a1 = vrshrq_n_s16(a1, %d);  
   a = vmlsq_lane_s16(a, a1, N, 0);
   return(a);
 }
-*/
+
 
 static int32x4_t reduce32x4 (int32x4_t a) {
   int32x2_t N = {%d,%d};
-  int32x4_t a1 = vqrdmulhq_lane_s32(a, N, 1);
+  int32x4_t a1 = vqdmulhq_lane_s32(a, N, 1);
+  a1 = vrshrq_n_s32(a1, %d);
   a = vmlsq_lane_s32(a, a1, N, 0);
   return(a);
 }
@@ -100,7 +102,7 @@ void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
   int16x4_t d0, d1, d2;
   int32x4_t q0, q1, q2;
   int16x8_t q10, q20;
-''' % (N, N3, NS+1, N, N2, K, B))
+''' % (N, N3, NS+1, N, N4, NS+1, K, B))
 
     print('''  assert(n == _K * ll); 
   int L = (2*_K-3) * ll;  // number of extra buffer for multiplicands
@@ -119,30 +121,30 @@ void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
         q2 = vmlal_lane_s16(q2, d2, d0, 0);
       }
       ptr -= _K;
-      reduce32x4(q1); reduce32x4(q2);
+      q1 = reduce32x4(q1); q2 = reduce32x4(q2);
       d1 = vmovn_s32(q1); vst1_s16(&ff[l*ll+j], d1);
       d2 = vmovn_s32(q2); vst1_s16(&gg[l*ll+j], d2);
     }
   }
   polymul(hh,f,g,ll);
   polymul(hh+2*ll,f+(_K-1)*ll,g+(_K-1)*ll,ll);  
-  for (l=0; l<2*_K-2; l++){
-    polymul(hh+(1+l)*2*ll,ff+l*ll,gg+l*ll,ll);
+  for (l=0; l<2*_K-3; l++){
+    polymul(hh+(2+l)*2*ll,ff+l*ll,gg+l*ll,ll);
   }
   memset(h+2*ll,0,2*(2*_K-2)*ll);  
   memcpy(h,hh,4*ll);
   ptr = interp + (2*_K-1);  
-  for(l=1; l<2*_K-3; l++) {
+  for(l=1; l<2*_K-2; l++, ptr+=(2*_K-1)) {
     for (j=0; j<2*ll; j+=4) {
-      d1 = vld1_s16(&h[i*ll+j]);
+      d1 = vld1_s16(&h[l*ll+j]);
       q1 = vmovl_s16(d1);
-      for (i=1; i<_K-1; i++) {
+      for (i=0; i<2*_K-1; i++) {
         d0 = vld1_lane_s16(ptr++, d0, 0);
         d1 = vld1_s16(&hh[i*2*ll+j]);
         q1 = vmlal_lane_s16(q1, d1, d0, 0);
       }
       ptr -=  (2*_K-1);
-      reduce32x4(q1);
+      q1 = reduce32x4(q1);
       d1 = vmovn_s32(q1); 
       vst1_s16(&h[l*ll+j], d1);
     }
@@ -151,6 +153,7 @@ void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
     q10 = vld1q_s16(&h[(2*_K-2)*ll+j]);
     q20 = vld1q_s16(&hh[2*ll+j]);
     q10 = vaddq_s16(q10, q20);
+    q10 = reduce16x8(q10);
     vst1q_s16(&h[(2*_K-2)*ll+j], q10); 
   }
 
