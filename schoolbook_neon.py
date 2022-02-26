@@ -84,7 +84,7 @@ def schoolbook_neon_c (B) :
 #include <assert.h>
 #include <stdio.h>
 
-int32x4_t reduce32x4 (int32x4_t a) {
+static int32x4_t reduce32x4 (int32x4_t a) {
   int32x2_t N = {%d,%d};
   int32x4_t a1 = vqrdmulhq_lane_s32(a, N, 1);
   a = vmlsq_lane_s32(a, a1, N, 0);

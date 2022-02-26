@@ -58,21 +58,23 @@ def toom_cook_neon_c (B, K) :
 #define polymul polymul_sb
 #endif
 
-
-    
 int16_t eval[] = {''')
     for i in range(2,2*K-1) :
-        for j in range(K) :
+        for j in range(1,K) :
             print(M0[i][j],end=",")
+        for j in range(K,1+(K+2)//4*4) :
+            print("0",end=",")
         print("")
     print('''};
 int16_t interp[] ={''')
     for i in range(2*K-1) :
         for j in range(2*K-1) :
             print(M1[i][j],end=",")
+        for j in range(2*K-1,(2*K+2)//4*4) :
+            print("0",end=",")
         print("")
     print('''};
-int32x4_t q00 = {0,0,0,0};
+int32x4_t q0 = {0,0,0,0};
 
 
 static int16x8_t reduce16x8 (int16x8_t a) {
@@ -98,29 +100,34 @@ extern void polymul(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n
 void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
 
   int i, j, k, l, _K=%d, ll=%d;
-  int16_t *ptr; 
-  int16x4_t d0, d1, d2;
-  int32x4_t q0, q1, q2;
+  int16_t *ptr;  
+  int16x4_t d1, d2;
+  int32x4_t q1, q2;
   int16x8_t q10, q20;
-''' % (N, N3, NS+1, N, N4, NS+1, K, B))
 
-    print('''  assert(n == _K * ll); 
+  assert(n == _K * ll); 
   int L = (2*_K-3) * ll;  // number of extra buffer for multiplicands
   int LL = L + 2*ll; // number for extra buffer for products
-  int16_t ff[L], gg[L], hh[2*LL];
-    
+  int16_t ff[L], gg[L], hh[2*LL];''' % (N, N3, NS+1, N, N4, NS+1, K, B))
+    for i in range(0,2*K-1,4) :
+        print("  int16x4_t d%d;" % (i))
+    print('''
   ptr = eval;
-  for (l=0; l<2*_K-3; l++, ptr+=_K){
+  for (l=0; l<2*_K-3; l++){''')
+    for i in range(0,K-1,4) :
+        print("    d%d = vld1_s16(ptr); ptr+=4;" % (i))
+    print('''
     for (j=0; j<ll; j+=4) {
-      q1 = q2 = q00;
-      for (i=0; i<_K; i++) {
-        d0 = vld1_lane_s16(ptr++, d0, 0);
-        d1 = vld1_s16(&f[i*ll+j]); 
-        d2 = vld1_s16(&g[i*ll+j]);
-	q1 = vmlal_lane_s16(q1, d1, d0, 0);
-        q2 = vmlal_lane_s16(q2, d2, d0, 0);
-      }
-      ptr -= _K;
+      d1 = vld1_s16(&f[j]); q1 = vmovl_s16(d1);
+      d2 = vld1_s16(&g[j]); q2 = vmovl_s16(d2);''')
+    
+    for i in range(K-1) :    
+        print("      d1 = vld1_s16(&f[%d*ll+j]);" % (i+1));
+        print("      d2 = vld1_s16(&g[%d*ll+j]);" % (i+1));
+        print("      q1 = vmlal_lane_s16(q1, d1, d%d, %d);" % (i//4*4,i%4))
+        print("      q2 = vmlal_lane_s16(q2, d2, d%d, %d);" % (i//4*4,i%4))
+        
+    print('''
       q1 = reduce32x4(q1); q2 = reduce32x4(q2);
       d1 = vmovn_s32(q1); vst1_s16(&ff[l*ll+j], d1);
       d2 = vmovn_s32(q2); vst1_s16(&gg[l*ll+j], d2);
@@ -133,17 +140,21 @@ void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
   }
   memset(h+2*ll,0,2*(2*_K-2)*ll);  
   memcpy(h,hh,4*ll);
-  ptr = interp + (2*_K-1);  
-  for(l=1; l<2*_K-2; l++, ptr+=(2*_K-1)) {
+  ptr = interp + %d;
+  for(l=1; l<2*_K-2; l++) {''' % ((2*K+2)//4*4))
+
+    for i in range(0,2*K-1,4) :
+        print("    d%d = vld1_s16(ptr); ptr+=4;" % (i))
+    print('''
     for (j=0; j<2*ll; j+=4) {
       d1 = vld1_s16(&h[l*ll+j]);
-      q1 = vmovl_s16(d1);
-      for (i=0; i<2*_K-1; i++) {
-        d0 = vld1_lane_s16(ptr++, d0, 0);
-        d1 = vld1_s16(&hh[i*2*ll+j]);
-        q1 = vmlal_lane_s16(q1, d1, d0, 0);
-      }
-      ptr -=  (2*_K-1);
+      q1 = vmovl_s16(d1);''')
+        
+    for i in range(2*K-1) :
+        print("      d1 = vld1_s16(&hh[%d*ll+j]);" % (2*i));
+        print("      q1 = vmlal_lane_s16(q1, d1, d%d, %d);" % (i//4*4,i%4))
+
+    print('''
       q1 = reduce32x4(q1);
       d1 = vmovn_s32(q1); 
       vst1_s16(&h[l*ll+j], d1);
