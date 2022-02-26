@@ -74,6 +74,15 @@ tc_neon_192x4.c: toom_cook_neon.py
 tc_neon_192x4: schoolbook_neon_4.c tc_neon_192x4.c ka_neon_48.c cpucycles.h mock_std_mult.h test.c
 	$(CC) $(CFLAGS) -DTOOM -DKARATSUBA -o tc_neon_192x4 schoolbook_neon_4.c tc_neon_192x4.c ka_neon_48.c test.c
 
+ka_neon_32.c: karatsuba_neon.py
+	python3 karatsuba_neon.py 32 > ka_neon_32.c
+
+tc_neon_128x6.c: toom_cook_neon.py
+	python3 toom_cook_neon.py 128 6 > tc_neon_128x6.c
+
+tc_neon_128x6: schoolbook_neon_4.c tc_neon_128x6.c ka_neon_32.c cpucycles.h mock_std_mult.h test.c
+	$(CC) $(CFLAGS) -DTOOM -DKARATSUBA -o tc_neon_128x6 schoolbook_neon_4.c tc_neon_128x6.c ka_neon_32.c test.c
+
 schoolbook_neon_negc_4.c: schoolbook_neon_negc.py
 	python3 schoolbook_neon_negc.py 4 > schoolbook_neon_negc_4.c
 
