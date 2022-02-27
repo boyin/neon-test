@@ -101,73 +101,78 @@ void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
 
   int i, j, k, l, _K=%d, ll=%d;
   int16_t *ptr;  
-  int16x4_t d1, d2;
-  int32x4_t q1, q2;
-  int16x8_t q10, q20;
 
   assert(n == _K * ll); 
   int L = (2*_K-3) * ll;  // number of extra buffer for multiplicands
   int LL = L + 2*ll; // number for extra buffer for products
   int16_t ff[L], gg[L], hh[2*LL];''' % (N, N3, NS+1, N, N4, NS+1, K, B))
-    for i in range(0,2*K-1,4) :
-        print("  int16x4_t d%d;" % (i))
+    for i in list(range(0,2*K-1,4))+[1,2] :
+        print("  int16x4_t d%d, d%d0" % (i,i), end="") 
+        for j in range(1,2*K-1) :
+            print(", d%d%d" % (i,j), end="")
+        print(";")
+    for i in [1,2] :
+        print("  int32x4_t q%d, q%d0" % (i,i), end="") 
+        for j in range(1,2*K-1) :
+            print(", q%d%d" % (i,j), end="")
+        print(";")
     print('''
-  ptr = eval;
-  for (l=0; l<2*_K-3; l++){''')
-    for i in range(0,K-1,4) :
-        print("    d%d = vld1_s16(ptr); ptr+=4;" % (i))
+  ptr = eval;''')
+    for l in range(2*K-3) :
+        for i in range(0,K-1,4) :
+            print("  d%d%d = vld1_s16(ptr); ptr+=4;" % (i,l))
     print('''
-    for (j=0; j<ll; j+=4) {
-      d1 = vld1_s16(&f[j]); q1 = vmovl_s16(d1);
-      d2 = vld1_s16(&g[j]); q2 = vmovl_s16(d2);''')
+  for (j=0; j<ll; j+=4) {
+    d10 = vld1_s16(&f[j]); // q1 = vmovl_s16(d1);
+    d20 = vld1_s16(&g[j]); // q2 = vmovl_s16(d2);''')
     
     for i in range(K-1) :    
-        print("      d1 = vld1_s16(&f[%d*ll+j]);" % (i+1));
-        print("      d2 = vld1_s16(&g[%d*ll+j]);" % (i+1));
-        print("      q1 = vmlal_lane_s16(q1, d1, d%d, %d);" % (i//4*4,i%4))
-        print("      q2 = vmlal_lane_s16(q2, d2, d%d, %d);" % (i//4*4,i%4))
+        print("    d1%d = vld1_s16(&f[%d*ll+j]);" % (i+1,i+1));
+        print("    d2%d = vld1_s16(&g[%d*ll+j]);" % (i+1,i+1));
+    print("")
+    for l in range(2*K-3) :
+        print("    q1 = vmovl_s16(d10); q2 = vmovl_s16(d20);")
+        for i in range(K-1) :     
+            print("    q1 = vmlal_lane_s16(q1,d1%d,d%d%d,%d);"%(i+1,i//4*4,l,i%4))
+            print("    q2 = vmlal_lane_s16(q2,d2%d,d%d%d,%d);"%(i+1,i//4*4,l,i%4))
         
-    print('''
-      q1 = reduce32x4(q1); q2 = reduce32x4(q2);
-      d1 = vmovn_s32(q1); vst1_s16(&ff[l*ll+j], d1);
-      d2 = vmovn_s32(q2); vst1_s16(&gg[l*ll+j], d2);
-    }
-  }
+        print('''
+    q1 = reduce32x4(q1); q2 = reduce32x4(q2);
+    d1 = vmovn_s32(q1); vst1_s16(&ff[%d*ll+j], d1);
+    d2 = vmovn_s32(q2); vst1_s16(&gg[%d*ll+j], d2);
+''' % (l,l))
+    print('''  }
   polymul(hh,f,g,ll);
   polymul(hh+2*ll,f+(_K-1)*ll,g+(_K-1)*ll,ll);  
   for (l=0; l<2*_K-3; l++){
     polymul(hh+(2+l)*2*ll,ff+l*ll,gg+l*ll,ll);
   }
-  memset(h+2*ll,0,2*(2*_K-2)*ll);  
+  memset(h+2*ll,0,2*(2*_K-4)*ll);  
   memcpy(h,hh,4*ll);
-  ptr = interp + %d;
-  for(l=1; l<2*_K-2; l++) {''' % ((2*K+2)//4*4))
+  memcpy(h+(2*_K-2)*ll,hh+2*ll,4*ll);
+  ptr = interp + %d;''' % ((2*K+2)//4*4))
 
-    for i in range(0,2*K-1,4) :
-        print("    d%d = vld1_s16(ptr); ptr+=4;" % (i))
+    for l in range(2*K-3) :
+        for i in range(0,2*K-1,4) :
+            print("  d%d%d = vld1_s16(ptr); ptr+=4;" % (i,l))
     print('''
-    for (j=0; j<2*ll; j+=4) {
-      d1 = vld1_s16(&h[l*ll+j]);
-      q1 = vmovl_s16(d1);''')
-        
+  for (j=0; j<2*ll; j+=4) {''')
+
+    for i in range(2*K-1) :    
+        print("    d1%d = vld1_s16(&hh[%d*2*ll+j]);" % (i,i));
+
+    for l in range(2*K-3) :
+        print('''    q1%d = vmovl_s16(vld1_s16(&h[%d*ll+j]));''' % (l,l+1))
+
     for i in range(2*K-1) :
-        print("      d1 = vld1_s16(&hh[%d*ll+j]);" % (2*i));
-        print("      q1 = vmlal_lane_s16(q1, d1, d%d, %d);" % (i//4*4,i%4))
+        for l in range(2*K-3) :
+            print("    q1%d = vmlal_lane_s16(q1%d,d1%d,d%d%d,%d);"%(l,l,i,i//4*4,l,i%4))
+    for l in range(2*K-3) :
+        print("    q1%d = reduce32x4(q1%d);" % (l,l))
+    for l in range(2*K-3) :
+        print("    vst1_s16(&h[%d*ll+j], vmovn_s32(q1%d));" % (l+1,l))
 
-    print('''
-      q1 = reduce32x4(q1);
-      d1 = vmovn_s32(q1); 
-      vst1_s16(&h[l*ll+j], d1);
-    }
-  }
-  for (j=0; j<2*ll; j+=8) {   
-    q10 = vld1q_s16(&h[(2*_K-2)*ll+j]);
-    q20 = vld1q_s16(&hh[2*ll+j]);
-    q10 = vaddq_s16(q10, q20);
-    q10 = reduce16x8(q10);
-    vst1q_s16(&h[(2*_K-2)*ll+j], q10); 
-  }
-
+    print('''  }
 }''')
 
 
