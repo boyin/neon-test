@@ -14,6 +14,12 @@ schoolbook: schoolbook.c cpucycles.h mock_std_mult.h test.c
 schoolbook_neon_old: schoolbook_neon_old.c cpucycles.h mock_std_mult.h test.c
 	$(CC) $(CFLAGS) -o schoolbook_neon_old schoolbook_neon_old.c test.c
 
+schoolbook_neon_1.c: schoolbook_neon.py
+	python3 schoolbook_neon.py 1 > schoolbook_neon_1.c
+
+schoolbook_neon_1: schoolbook_neon_1.c cpucycles.h mock_std_mult.h test.c
+	$(CC) $(CFLAGS) -o schoolbook_neon_1 schoolbook_neon_1.c test.c
+
 schoolbook_neon_2.c: schoolbook_neon.py
 	python3 schoolbook_neon.py 2 > schoolbook_neon_2.c
 
@@ -43,6 +49,12 @@ ka_neon_48.c: karatsuba_neon.py
 
 ka_neon_48: schoolbook_neon_6.c ka_neon_48.c cpucycles.h mock_std_mult.h test.c
 	$(CC) $(CFLAGS) -DKARATSUBA -o ka_neon_48 ka_neon_48.c schoolbook_neon_6.c test.c
+
+ka_2p16_neon_48.c: karatsuba_neon_2p16.py
+	python3 karatsuba_neon_2p16.py 48 > ka_2p16_neon_48.c
+
+ka_2p16_neon_48: schoolbook_2p16_neon_2.c ka_2p16_neon_48.c cpucycles.h mock_std_mult.h test_2p16.c
+	$(CC) $(CFLAGS) -DKARATSUBA -o ka_2p16_neon_48 ka_2p16_neon_48.c schoolbook_2p16_neon_2.c test_2p16.c
 
 ka_neon_48_4: schoolbook_neon_4.c ka_neon_48.c cpucycles.h mock_std_mult.h test.c
 	$(CC) $(CFLAGS) -DKARATSUBA -o ka_neon_48_4 ka_neon_48.c schoolbook_neon_4.c test.c
@@ -101,5 +113,19 @@ schoolbook3_neon_3.c: schoolbook_neon_mod3.py
 schoolbook3_neon_3: schoolbook3_neon_3.c cpucycles.h mock_std_mult.h test3.c
 	$(CC) $(CFLAGS) -o schoolbook3_neon_3 schoolbook3_neon_3.c test3.c
 
+schoolbook_2p16_neon_2.c: schoolbook_neon_2p16.py
+	python3 schoolbook_neon_2p16.py 2 > schoolbook_2p16_neon_2.c
+
+schoolbook_2p16_neon_2: schoolbook_2p16_neon_2.c cpucycles.h mock_std_mult.h test_2p16.c
+	$(CC) $(CFLAGS) -o schoolbook_2p16_neon_2 schoolbook_2p16_neon_2.c test_2p16.c
+
+schoolbook_2p16_neon_3.c: schoolbook_neon_2p16.py
+	python3 schoolbook_neon_2p16.py 3 > schoolbook_2p16_neon_3.c
+
+schoolbook_2p16_neon_3: schoolbook_2p16_neon_3.c cpucycles.h mock_std_mult.h test_2p16.c
+	$(CC) $(CFLAGS) -o schoolbook_2p16_neon_3 schoolbook_2p16_neon_3.c test_2p16.c
+
+
+
 clean:
-	rm -f schoolbook schoolbook_neon_{2,3,4,6,old} schoolbook_neon_{2,3,4,6}.c ka_neon_*
+	rm -f schoolbook schoolbook_neon_{2,3,4,6,old} schoolbook_neon_{2,3,4,6}.c ka_neon_* schoolbook3_neon_? schoolbook3_neon_?.c schoolbook_2p16_neon_? schoolbook_2p16_neon_?.c 
