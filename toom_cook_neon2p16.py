@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from math import log,ceil,floor,sqrt
-from toom_matrix_sage import Toom_Matrix3
+from toom_matrices import Toom_Matrices
 import sys
 import re
 
@@ -50,9 +50,8 @@ assert (N == 2**lgN)
 
 
 def toom_cook_neon_c (B, K) :
-    M0,M1,l = Toom_Matrix3 (K, N)
-    M0 = eval(M0)
-    M1 = eval(M1)
+    M0,M1,l = Toom_Matrices[(K, N)]
+
     print('''
 #include <stdint.h>
 #include <arm_neon.h>

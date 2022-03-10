@@ -1,4 +1,4 @@
-CC = gcc
+1CC = gcc
 CFLAGS = -O3 -march=native -mtune=native -mcpu=native
 
 AARCH := $(shell uname -m)
@@ -137,7 +137,8 @@ schoolbook2p16_neon_3.c: schoolbook_neon2p16.py
 schoolbook2p16_neon_3: schoolbook2p16_neon_3.c cpucycles.h mock_std_mult.h test2p16.c
 	$(CC) $(CFLAGS) -o schoolbook2p16_neon_3 schoolbook2p16_neon_3.c test2p16.c
 
-
+toom_matrices.py : toom_matrix.sage
+	sage toom_matrix.sage > toom_matrices.py
 
 clean:
 	rm -f schoolbook schoolbook_neon_{2,3,4,6,old} schoolbook_neon_{2,3,4,6}.c ka_neon* schoolbook3_neon_? schoolbook3_neon_?.c schoolbook2p16_neon_? schoolbook2p16_neon_?.c 
