@@ -32,7 +32,16 @@ def mod_inverse(a, m) :
 def cmod_inverse(a, m) :
     return cmod(mod_inverse(a, m), m)
 
-N = 4591
+    
+try : B = int(sys.argv[1])
+except : B = 32    
+
+try : K = int(sys.argv[2])
+except : K = 3
+
+try : N = int(sys.argv[3])
+except: N = 4591
+
 R = 2**16
 NN = cmod_inverse(N, R)
 NS = int(floor(log(N)/log(2.0))) - 1
@@ -176,11 +185,5 @@ void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
 
 
 
-    
-try : B = int(sys.argv[1])
-except : B = 32    
-
-try : K = int(sys.argv[2])
-except : K = 3
 
 toom_cook_neon_c(B, K) 
