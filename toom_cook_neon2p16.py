@@ -69,7 +69,9 @@ def toom_cook_neon_c (B, K) :
 
 #define NS %d
 
-int16_t eval[] = {''' % (l))
+int16x8_t qm = {%d,%d,%d,%d,%d,%d,%d,%d}; 
+
+int16_t eval[] = {''' % (l,N-1,N-1,N-1,N-1,N-1,N-1,N-1,N-1))
     for i in range(2,2*K-1) :
         for j in range(K) :
             print(M0[i][j],end=",")
@@ -145,6 +147,7 @@ void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
         print("      q1 = vmlaq_lane_s16(q1, q10, d%d, %d);" % (i//4*4,i%4))
 
     print('''
+      q1 = vbicq_s16(q1, qm);
       vst1q_s16(&h[l*ll+j], q1);
     }
   }
@@ -155,6 +158,8 @@ void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
     q20 = vld1q_s16(&hh[ll+j]);
     q10 = vsraq_n_s16(q10, q1, NS);
     q20 = vsraq_n_s16(q20, q2, NS);
+    q10 = vbicq_s16(q10, qm);
+    q20 = vbicq_s16(q20, qm);
     vst1q_s16(&h[(2*_K-2)*ll+j], q10); 
     vst1q_s16(&h[ll+j],q20);
   }
