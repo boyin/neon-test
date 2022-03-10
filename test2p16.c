@@ -54,7 +54,7 @@ int main(){
     mock_std_mult_2p16(hh,f,g,n);
 
     for (j=0; j<2*n; j++) {
-      if (h[j]!=hh[j]) {
+      if ((h[j]-hh[j]) & 8191 !=0) {
 	printf("%d %d %d\n",j,h[j],hh[j]);
 	break;
       }
