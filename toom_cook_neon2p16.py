@@ -129,40 +129,27 @@ void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
   for (l=0; l<2*_K-3; l++){
     polymul(hh+(2+l)*2*ll,ff+l*ll,gg+l*ll,ll);
   }
-  memset(h+2*ll,0,2*(2*_K-2)*ll);  
-  memcpy(h,hh,2*ll);
-  memcpy(h+(2*_K-1)*2*ll,hh+6*ll,2*ll);  
-  ptr = interp + %d;
-  for(l=1; l<2*_K-2; l++) {''' % ((2*K+2)//4*4))
-
+  memset(h,0,2*(2*_K)*ll);  
+  ptr = interp;''') #% ((2*K+2)//4*4)
+    print('''
+  for(l=0; l<2*_K-1; l++) {''')
     for i in range(0,2*K-1,4) :
         print("    d%d = vld1_s16(ptr); ptr+=4;" % (i))
     print('''
     for (j=0; j<2*ll; j+=8) {
       q1 = vld1q_s16(&h[l*ll+j]);''')
-        
     for i in range(2*K-1) :
         print("      q10 = vld1q_s16(&hh[%d*ll+j]);" % (2*i));
         print("      q1 = vmlaq_lane_s16(q1, q10, d%d, %d);" % (i//4*4,i%4))
-
     print('''
-      q1 = vbicq_s16(q1, qm);
       vst1q_s16(&h[l*ll+j], q1);
     }
   }
-  for (j=0; j<ll; j+=8) {   
-    q1 = vld1q_s16(&h[(2*_K-2)*ll+j]);
-    q2 = vld1q_s16(&h[ll+j]);
-    q10 = vld1q_s16(&hh[2*ll+j]);
-    q20 = vld1q_s16(&hh[ll+j]);
-    q10 = vsraq_n_s16(q10, q1, NS);
-    q20 = vsraq_n_s16(q20, q2, NS);
-    q10 = vbicq_s16(q10, qm);
-    q20 = vbicq_s16(q20, qm);
-    vst1q_s16(&h[(2*_K-2)*ll+j], q10); 
-    vst1q_s16(&h[ll+j],q20);
+  for (j=0; j<2*_K*ll; j+=8) {   
+    q1 = vld1q_s16(&h[j]);
+    q1 = vshrq_n_s16(q1,NS);
+    vst1q_s16(&h[j],q1);
   }
-
 }''')
 
 
