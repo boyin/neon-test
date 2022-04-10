@@ -41,6 +41,12 @@ except : K = 4
 try : N = int(sys.argv[3])
 except : N = 8192
 
+try : NAME = sys.argv[4]
+except : NAME = "polymul_tc"
+
+try : BOT = sys.argv[5]
+except : BOT = "none"
+
 R = 2**16
 
 lgN = 0
@@ -50,7 +56,7 @@ assert (N == 2**lgN)
 
 
 def toom_cook_neon_c (B, K) :
-    M0,M1,l = Toom_Matrices[(K, N)]
+    M0,M1,ll = Toom_Matrices[(K, N)]
 
     print('''
 #include <stdint.h>
@@ -58,19 +64,24 @@ def toom_cook_neon_c (B, K) :
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string.h>''')
 
+    if (BOT == "none") :
+        print('''
 #if (defined(KARATSUBA))
 #define polymul polymul_ka
 #else
 #define polymul polymul_sb
-#endif
-
+#endif''')
+    else :
+        print("#define polymul %s" % (BOT))
+         
+    print('''
 #define NS %d
 
-int16x8_t qm = {%d,%d,%d,%d,%d,%d,%d,%d}; 
+static int16x8_t qm = {%d,%d,%d,%d,%d,%d,%d,%d}; 
 
-int16_t eval[] = {''' % (l,N-1,N-1,N-1,N-1,N-1,N-1,N-1,N-1))
+static int16_t eval[] = {''' % (ll,N-1,N-1,N-1,N-1,N-1,N-1,N-1,N-1))
     for i in range(2,2*K-1) :
         for j in range(K) :
             print(M0[i][j],end=",")
@@ -78,7 +89,7 @@ int16_t eval[] = {''' % (l,N-1,N-1,N-1,N-1,N-1,N-1,N-1,N-1))
             print("0",end=",")
         print("")
     print('''};
-int16_t interp[] ={''')
+static int16_t interp[] ={''')
     for i in range(2*K-1) :
         for j in range(2*K-1) :
             print(M1[i][j],end=",")
@@ -86,71 +97,102 @@ int16_t interp[] ={''')
             print("0",end=",")
         print("")
     print('''};
-int16x8_t q0 = {0,0,0,0,0,0,0,0};
+static int16x8_t q0 = {0,0,0,0,0,0,0,0};
 
 extern void polymul(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n);
 
-void polymul_tc(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
+void %s(int16_t *h,const int16_t *f,const int16_t *g,const int16_t n){
 
   int i, j, k, l, _K=%d, ll=%d;
   int16_t *ptr;  
-  int16x8_t q1, q2, q10, q20;
 
   assert(n == _K * ll); 
   int L = (2*_K-3) * ll;  // number of extra buffer for multiplicands
   int LL = L + 2*ll; // number for extra buffer for products
-  int16_t ff[L], gg[L], hh[2*LL];''' % (K, B))
-    for i in range(0,2*K-1,4) :
-        print("  int16x4_t d%d;" % (i))
+  int16_t ff[L], gg[L], hh[2*LL];''' % (NAME, K, B))
+    for i in list(range(0,2*K-1,4)) :
+        print("  int16x4_t d%d, d%d0" % (i,i), end="") 
+        for j in range(1,2*K-1) :
+            print(", d%d%d" % (i,j), end="")
+        print(";")
+    for i in [1,2] :
+        print("  int16x8_t q%d, q%d0" % (i,i), end="") 
+        for j in range(1,2*K-1) :
+            print(", q%d%d" % (i,j), end="")
+        print(";")
     print('''
-  ptr = eval;
-  for (l=0; l<2*_K-3; l++){''')
-    for i in range(0,K-1,4) :
-        print("    d%d = vld1_s16(ptr); ptr+=4;" % (i))
+  ptr = eval;''')
+    for l in range(2*K-3) :
+        for i in range(0,K-1,4) :
+            print("  d%d%d = vld1_s16(ptr); ptr+=4;" % (i,l))
     print('''
-    for (j=0; j<ll; j+=8) {''')
-    for i in range(K) :
-        print("      q10 = vld1q_s16(&f[%d*ll+j]);" % (i));
-        print("      q20 = vld1q_s16(&g[%d*ll+j]);" % (i));
-        if (i==0) :
-            print("      q1 = vmulq_lane_s16(q10, d0, 0);")
-            print("      q2 = vmulq_lane_s16(q20, d0, 0);")
-        else :
-            print("      q1 = vmlaq_lane_s16(q1, q10, d%d, %d);" % (i//4*4,i%4))
-            print("      q2 = vmlaq_lane_s16(q2, q20, d%d, %d);" % (i//4*4,i%4))
-        
-    print('''
-      vst1q_s16(&ff[l*ll+j], q1);
-      vst1q_s16(&gg[l*ll+j], q2);
-    }
-  }
+  for (j=0; j<ll; j+=8) {''')
+    for i in range(K) :    
+        print("    q1%d = vld1q_s16(&f[%d*ll+j]);" % (i,i));
+        print("    q2%d = vld1q_s16(&g[%d*ll+j]);" % (i,i));
+    print("")
+    for l in range(2*K-3) :
+        for i in range(K) :
+            if (i==0) :
+                print("    q1 = vmulq_lane_s16(q10, d0%d, 0);" % l)
+                print("    q2 = vmulq_lane_s16(q20, d0%d, 0);" % l)
+            else :
+                print("    q1 = vmlaq_lane_s16(q1, q1%d, d%d%d, %d);"%(i,i//4*4,l,i%4))
+                print("    q2 = vmlaq_lane_s16(q2, q2%d, d%d%d, %d);"%(i,i//4*4,l,i%4))
+        print('''    vst1q_s16(&ff[%d*ll+j], q1);
+    vst1q_s16(&gg[%d*ll+j], q2);
+''' % (l,l))
+    print('''  }
   polymul(hh,f,g,ll);
   polymul(hh+2*ll,f+(_K-1)*ll,g+(_K-1)*ll,ll);  
   for (l=0; l<2*_K-3; l++){
     polymul(hh+(2+l)*2*ll,ff+l*ll,gg+l*ll,ll);
   }
-  memset(h,0,2*(2*_K)*ll);  
-  ptr = interp;''') #% ((2*K+2)//4*4)
+  memcpy(h,hh,2*ll);  
+  memcpy(h+(2*_K-1)*ll,hh+3*ll,2*ll);
+  ptr = interp+ %d;''' % ((2*K+2)//4*4))
+    for l in range(2*K-3) :
+        for i in range(0,2*K-1,4) :
+            print("  d%d%d = vld1_s16(ptr); ptr+=4;" % (i,l))
     print('''
-  for(l=0; l<2*_K-1; l++) {''')
-    for i in range(0,2*K-1,4) :
-        print("    d%d = vld1_s16(ptr); ptr+=4;" % (i))
-    print('''
-    for (j=0; j<2*ll; j+=8) {
-      q1 = vld1q_s16(&h[l*ll+j]);''')
+  for (j=0; j<ll; j+=8) {''')
+    for i in range(2*K-1) :    
+        print("    q1%d = vld1q_s16(&hh[(%d*2)*ll+j]);" % (i,i));
     for i in range(2*K-1) :
-        print("      q10 = vld1q_s16(&hh[%d*ll+j]);" % (2*i));
-        print("      q1 = vmlaq_lane_s16(q1, q10, d%d, %d);" % (i//4*4,i%4))
+        for l in range(2*K-3) :
+            if (i==0) : print("    q2%d = vmulq_lane_s16(q10, d0%d, 0);" %(l,l))
+            else : print("    q2%d = vmlaq_lane_s16(q2%d, q1%d, d%d%d, %d);" % (l,l,i,i//4*4,l,i%4))
     print('''
-      vst1q_s16(&h[l*ll+j], q1);
-    }
+    q2 = vld1q_s16(&hh[ll+j]);
+    q2 = vsraq_n_s16(q2,q20,NS);''')
+    if (2**ll*N<2**16) : print("    q2 = vandq_s16(q2,qm);")
+    print("    vst1q_s16(&h[ll+j],q2);")
+    for l in range(1,2*K-3) :
+        print("    vst1q_s16(&h[(1+%d)*ll+j],q2%d);" % (l,l))
+    print('''  }''')
+    print('''
+  for (j=0; j<ll; j+=8) {''')
+    for i in range(2*K-1) :    
+        print("    q1%d = vld1q_s16(&hh[(%d*2+1)*ll+j]);" % (i,i));
+    for l in range(2*K-3) :
+        if (l<2*K-4) :
+            print("    q2%d = vld1q_s16(&h[(2+%d)*ll+j]);" %(l,l))
+        else : print("    q2%d = q0;" %(l))
+    for i in range(2*K-1) :
+        for l in range(2*K-3) :
+            print("    q2%d = vmlaq_lane_s16(q2%d, q1%d, d%d%d, %d);" % (l,l,i,i//4*4,l,i%4))
+    for l in range(2*K-4) :
+        print('''
+    q2%d = vshrq_n_s16(q2%d,NS);''' % (l,l))
+        if (2**ll*N<2**16) : print("    q2%d = vandq_s16(q2%d,qm);" % (l,l))
+        print("    vst1q_s16(&h[(%d+2)*ll+j],q2%d);" % (l,l))
+    print('''
+    q2 = vld1q_s16(&hh[2*ll+j]);
+    q2 = vsraq_n_s16(q2,q2%d,NS);'''% (2*K-4))
+    if (2**ll*N<2**16) : print("    q2 = vandq_s16(q2,qm);")
+    print('''    vst1q_s16(&h[(2+%d)*ll+j], q2);
   }
-  for (j=0; j<2*_K*ll; j+=8) {   
-    q1 = vld1q_s16(&h[j]);
-    q1 = vshrq_n_s16(q1,NS);
-    vst1q_s16(&h[j],q1);
-  }
-}''')
+}''' % (2*K-4))
 
 
 

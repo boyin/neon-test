@@ -135,4 +135,4 @@ def Toom_Matrices_build(L) :
         M0,M1,l = Toom_Matrix3(K,N)
         print("Toom_Matrices[(%d,%d)]=(%s,%s,%d)" % (K,N,M0,M1,l))
 
-Toom_Matrices_build([(4,8192),(4,2048)])
+Toom_Matrices_build([(3,8192),(3,2048),(4,8192),(4,2048),(5,2048)])
