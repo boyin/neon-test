@@ -115,9 +115,7 @@ int crypto_stream_chacha20(unsigned char *c,unsigned long long clen, const unsig
   vst1q_u32((void *)(setup+16), vld1q_u32((void *)k));
   vst1q_u32((void *)(setup+32), vld1q_u32((void *)(k+16)));
   *((uint64_t *)(setup+48)) = C;
-  *((uint64_t *)(setup+52)) = C;
   *((uint64_t *)(setup+56)) = *((uint64_t *)(n));
-  *((uint64_t *)(setup+60)) = *((uint64_t *)(n+4));
 
   while(clen >= 256) {
     crypto_core_chacha20_neon(c,setup);

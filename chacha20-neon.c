@@ -13,8 +13,6 @@ static inline int crypto_core_chacha20_neon(unsigned char *out, unsigned char *i
   int i;
   uint32x4_t T, D0, D1, D2, D3;
   uint32x4x4_t A, B, C, D, AA, BB, CC, DD;
-  uint32x4x2_t TTT;
-  uint64x2x2_t TT;
 
   A = vld4q_dup_u32((void *)(in));
   B = vld4q_dup_u32((void *)(in+16));
@@ -256,9 +254,7 @@ int crypto_stream_chacha20(unsigned char *c,unsigned long long clen, const unsig
   vst1q_u32((void *)(setup+16), vld1q_u32((void *)k));
   vst1q_u32((void *)(setup+32), vld1q_u32((void *)(k+16)));
   *((uint64_t *)(setup+48)) = C;
-  *((uint64_t *)(setup+52)) = C;
   *((uint64_t *)(setup+56)) = *((uint64_t *)(n));
-  *((uint64_t *)(setup+60)) = *((uint64_t *)(n+4));
 
   while(clen >= 256) {
     crypto_core_chacha20_neon(c,setup);

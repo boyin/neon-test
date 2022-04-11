@@ -78,7 +78,7 @@ int main(){
   else printf("Test successful!\n");
   
   for (i=0; i<REPS; i++) {
-    for (j=0; j<32; j++) keys[j]=rand();
+    for (j=0; j<8; j++) keys[j]=rand();
     for (j=0; j<3; j++) nonces[j]=rand();
     
     c1 = hal_get_time();

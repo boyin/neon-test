@@ -31,36 +31,36 @@ static int crypto_core_chacha20_neon(unsigned char *out, unsigned char *in){
     E0 = vshlq_n_u32(D0, 16);
     E1 = vshlq_n_u32(D1, 16);
     E2 = vshlq_n_u32(D2, 16); 
-    D0 = vsriq_n_u32(E0, D0, 16);
-    D1 = vsriq_n_u32(E1, D1, 16);
-    D2 = vsriq_n_u32(E2, D2, 16);
+    D0 = vsraq_n_u32(E0, D0, 16);
+    D1 = vsraq_n_u32(E1, D1, 16);
+    D2 = vsraq_n_u32(E2, D2, 16);
     
     C0 = vaddq_u32(C0, D0); C1 = vaddq_u32(C1, D1); C2 = vaddq_u32(C2, D2);
     B0 = veorq_u32(B0, C0); B1 = veorq_u32(B1, C1); B2 = veorq_u32(B2, C2);
     E0 = vshlq_n_u32(B0, 12);
     E1 = vshlq_n_u32(B1, 12);
     E2 = vshlq_n_u32(B2, 12); 
-    B0 = vsriq_n_u32(E0, B0, 20);
-    B1 = vsriq_n_u32(E1, B1, 20);
-    B2 = vsriq_n_u32(E2, B2, 20);
+    B0 = vsraq_n_u32(E0, B0, 20);
+    B1 = vsraq_n_u32(E1, B1, 20);
+    B2 = vsraq_n_u32(E2, B2, 20);
     
     A0 = vaddq_u32(A0, B0); A1 = vaddq_u32(A1, B1); A2 = vaddq_u32(A2, B2);
     D0 = veorq_u32(D0, A0); D1 = veorq_u32(D1, A1); D2 = veorq_u32(D2, A2);
     E0 = vshlq_n_u32(D0, 8);
     E1 = vshlq_n_u32(D1, 8);
     E2 = vshlq_n_u32(D2, 8); 
-    D0 = vsriq_n_u32(E0, D0, 24);
-    D1 = vsriq_n_u32(E1, D1, 24);
-    D2 = vsriq_n_u32(E2, D2, 24);
+    D0 = vsraq_n_u32(E0, D0, 24);
+    D1 = vsraq_n_u32(E1, D1, 24);
+    D2 = vsraq_n_u32(E2, D2, 24);
     
     C0 = vaddq_u32(C0, D0); C1 = vaddq_u32(C1, D1); C2 = vaddq_u32(C2, D2);
     B0 = veorq_u32(B0, C0); B1 = veorq_u32(B1, C1); B2 = veorq_u32(B2, C2);
     E0 = vshlq_n_u32(B0, 7);
     E1 = vshlq_n_u32(B1, 7);
     E2 = vshlq_n_u32(B2, 7); 
-    B0 = vsriq_n_u32(E0, B0, 25);
-    B1 = vsriq_n_u32(E1, B1, 25);
-    B2 = vsriq_n_u32(E2, B2, 25);
+    B0 = vsraq_n_u32(E0, B0, 25);
+    B1 = vsraq_n_u32(E1, B1, 25);
+    B2 = vsraq_n_u32(E2, B2, 25);
 
     B0 = vextq_u32(B0, B0, 1);
     B1 = vextq_u32(B1, B1, 1);
@@ -77,36 +77,36 @@ static int crypto_core_chacha20_neon(unsigned char *out, unsigned char *in){
     E0 = vshlq_n_u32(D0, 16);
     E1 = vshlq_n_u32(D1, 16);
     E2 = vshlq_n_u32(D2, 16); 
-    D0 = vsriq_n_u32(E0, D0, 16);
-    D1 = vsriq_n_u32(E1, D1, 16);
-    D2 = vsriq_n_u32(E2, D2, 16);
+    D0 = vsraq_n_u32(E0, D0, 16);
+    D1 = vsraq_n_u32(E1, D1, 16);
+    D2 = vsraq_n_u32(E2, D2, 16);
     
     C0 = vaddq_u32(C0, D0); C1 = vaddq_u32(C1, D1); C2 = vaddq_u32(C2, D2);
     B0 = veorq_u32(B0, C0); B1 = veorq_u32(B1, C1); B2 = veorq_u32(B2, C2);
     E0 = vshlq_n_u32(B0, 12);
     E1 = vshlq_n_u32(B1, 12);
     E2 = vshlq_n_u32(B2, 12); 
-    B0 = vsriq_n_u32(E0, B0, 20);
-    B1 = vsriq_n_u32(E1, B1, 20);
-    B2 = vsriq_n_u32(E2, B2, 20);
+    B0 = vsraq_n_u32(E0, B0, 20);
+    B1 = vsraq_n_u32(E1, B1, 20);
+    B2 = vsraq_n_u32(E2, B2, 20);
     
     A0 = vaddq_u32(A0, B0); A1 = vaddq_u32(A1, B1); A2 = vaddq_u32(A2, B2);
     D0 = veorq_u32(D0, A0); D1 = veorq_u32(D1, A1); D2 = veorq_u32(D2, A2);
     E0 = vshlq_n_u32(D0, 8);
     E1 = vshlq_n_u32(D1, 8);
     E2 = vshlq_n_u32(D2, 8); 
-    D0 = vsriq_n_u32(E0, D0, 24);
-    D1 = vsriq_n_u32(E1, D1, 24);
-    D2 = vsriq_n_u32(E2, D2, 24);
+    D0 = vsraq_n_u32(E0, D0, 24);
+    D1 = vsraq_n_u32(E1, D1, 24);
+    D2 = vsraq_n_u32(E2, D2, 24);
     
     C0 = vaddq_u32(C0, D0); C1 = vaddq_u32(C1, D1); C2 = vaddq_u32(C2, D2);
     B0 = veorq_u32(B0, C0); B1 = veorq_u32(B1, C1); B2 = veorq_u32(B2, C2);
     E0 = vshlq_n_u32(B0, 7);
     E1 = vshlq_n_u32(B1, 7);
     E2 = vshlq_n_u32(B2, 7); 
-    B0 = vsriq_n_u32(E0, B0, 25);
-    B1 = vsriq_n_u32(E1, B1, 25);
-    B2 = vsriq_n_u32(E2, B2, 25);
+    B0 = vsraq_n_u32(E0, B0, 25);
+    B1 = vsraq_n_u32(E1, B1, 25);
+    B2 = vsraq_n_u32(E2, B2, 25);
 
     B0 = vextq_u32(B0, B0, 3);
     B1 = vextq_u32(B1, B1, 3);
@@ -159,9 +159,7 @@ int crypto_stream_chacha20(unsigned char *c,unsigned long long clen, const unsig
   vst1q_u32((void *)(setup+16), vld1q_u32((void *)k));
   vst1q_u32((void *)(setup+32), vld1q_u32((void *)(k+16)));
   *((uint64_t *)(setup+48)) = C;
-  *((uint64_t *)(setup+52)) = C;
   *((uint64_t *)(setup+56)) = *((uint64_t *)(n));
-  *((uint64_t *)(setup+60)) = *((uint64_t *)(n+4));
 
   while(clen >= 192) {
     crypto_core_chacha20_neon(c,setup);
