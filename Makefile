@@ -198,6 +198,10 @@ test-chacha20: test-chacha20.c chacha20.c
 test-chacha20-S: test-chacha20.c chacha20.S
 	$(CC) $(CFLAGS) test-chacha20.c chacha20.S
 
+
+chacha20-neon.c: chacha20-neon-A72.py
+	python3 chacha20-neon-A72.py > chacha20-neon.c
+
 test-chacha20-neon: test-chacha20.c chacha20-neon.c
 	$(CC) $(CFLAGS) test-chacha20.c chacha20-neon.c
 
