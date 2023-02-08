@@ -12,7 +12,7 @@ def testgen (i, j) :
     yield("    D.val[%d] = veorq_u32  ( D.val[%d], A.val[%d]);"  % (iD,iD,iA))
     #yield("    DD.val[%d]= vshlq_n_u32( D.val[%d], 16);"         % (iD,iD))
     #yield("    DD.val[%d]= vsraq_n_u32(DD.val[%d], D.val[%d], 16);"% (iD,iD,iD))
-    yield("DD.val[%d] = vreinterpretq_u32_u16(vrev32q_u16(vreinterpretq_u16_u32(D.val[%d])));" % (iD, iD));
+    yield("    DD.val[%d] = vreinterpretq_u32_u16(vrev32q_u16(vreinterpretq_u16_u32(D.val[%d])));" % (iD, iD));
     yield("    C.val[%d] = vaddq_u32  ( C.val[%d],DD.val[%d]);"  % (iC,iC,iD))
     yield("    B.val[%d] = veorq_u32  ( B.val[%d], C.val[%d]);"     % (iB,iB,iC))
     yield("    BB.val[%d]= vshlq_n_u32( B.val[%d], 12);"         % (iB,iB))
